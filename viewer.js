@@ -599,53 +599,7 @@ const renderPreview = (uniqueKey, pairData) => {
             printBtn.innerText = "PDFとして保存";
             printBtn.onclick = () => window.print();
 
-            // 倍率調整コントロール
-            let currentZoom = 100;
-            
-            const zoomControl = document.createElement("div");
-            zoomControl.setAttribute("class", "zoom-control");
-
-            const zoomLabel = document.createElement("label");
-            zoomLabel.innerText = "表示:";
-
-            const zoomOutBtn = document.createElement("button");
-            zoomOutBtn.setAttribute("class", "zoom-btn");
-            zoomOutBtn.innerText = "−";
-            zoomOutBtn.onclick = () => {
-                if (currentZoom > 30) {
-                    currentZoom -= 10;
-                    zoomValue.innerText = `${currentZoom}%`;
-                    container.style.transform = `scale(${currentZoom / 100})`;
-                }
-            };
-
-            const zoomValue = document.createElement("span");
-            zoomValue.setAttribute("class", "zoom-value");
-            zoomValue.innerText = "100%";
-
-            const zoomInBtn = document.createElement("button");
-            zoomInBtn.setAttribute("class", "zoom-btn");
-            zoomInBtn.innerText = "＋";
-            zoomInBtn.onclick = () => {
-                if (currentZoom < 150) {
-                    currentZoom += 10;
-                    zoomValue.innerText = `${currentZoom}%`;
-                    container.style.transform = `scale(${currentZoom / 100})`;
-                }
-            };
-
-            const zoomResetBtn = document.createElement("button");
-            zoomResetBtn.setAttribute("class", "zoom-btn");
-            zoomResetBtn.innerText = "100%";
-            zoomResetBtn.onclick = () => {
-                currentZoom = 100;
-                zoomValue.innerText = "100%";
-                container.style.transform = "scale(1)";
-            };
-
-            zoomControl.append(zoomLabel, zoomOutBtn, zoomValue, zoomInBtn, zoomResetBtn);
-
-            leftSection.append(countLabel, printBtn, zoomControl);
+            leftSection.append(countLabel, printBtn);
             header.append(leftSection);
 
             const infoSection = document.createElement("div");
@@ -792,7 +746,67 @@ const renderUI = () => {
         clearBtn.onmouseout = () => { clearBtn.style.background = "#f44336"; };
 
         headerButtons.append(addFileBtn, clearBtn);
-        leftHeader.append(headerTop, headerButtons);
+        
+        // 倍率調整コントロール
+        let currentZoom = 100;
+        
+        const zoomRow = document.createElement("div");
+        zoomRow.style.cssText = "display: flex; gap: 4px; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;";
+        
+        const zoomControl = document.createElement("div");
+        zoomControl.setAttribute("class", "zoom-control");
+        zoomControl.style.cssText = "display: flex; align-items: center; gap: 4px; padding: 3px 6px; background: #fafafa; border-radius: 3px; border: 1px solid #ddd; flex: 1;";
+
+        const zoomLabel = document.createElement("label");
+        zoomLabel.style.cssText = "font-size: 11px !important; color: #555 !important; margin: 0;";
+        zoomLabel.innerText = "表示:";
+
+        const zoomOutBtn = document.createElement("button");
+        zoomOutBtn.setAttribute("class", "zoom-btn");
+        zoomOutBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
+        zoomOutBtn.innerText = "−";
+        zoomOutBtn.onclick = () => {
+            if (currentZoom > 30) {
+                currentZoom -= 10;
+                zoomValue.innerText = `${currentZoom}%`;
+                const allContainers = document.querySelectorAll('.right-panel .container');
+                allContainers.forEach(c => c.style.transform = `scale(${currentZoom / 100})`);
+            }
+        };
+
+        const zoomValue = document.createElement("span");
+        zoomValue.setAttribute("class", "zoom-value");
+        zoomValue.style.cssText = "font-size: 11px !important; color: #333 !important; min-width: 35px; text-align: center; font-weight: 600;";
+        zoomValue.innerText = "100%";
+
+        const zoomInBtn = document.createElement("button");
+        zoomInBtn.setAttribute("class", "zoom-btn");
+        zoomInBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
+        zoomInBtn.innerText = "＋";
+        zoomInBtn.onclick = () => {
+            if (currentZoom < 150) {
+                currentZoom += 10;
+                zoomValue.innerText = `${currentZoom}%`;
+                const allContainers = document.querySelectorAll('.right-panel .container');
+                allContainers.forEach(c => c.style.transform = `scale(${currentZoom / 100})`);
+            }
+        };
+
+        const zoomResetBtn = document.createElement("button");
+        zoomResetBtn.setAttribute("class", "zoom-btn");
+        zoomResetBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
+        zoomResetBtn.innerText = "100%";
+        zoomResetBtn.onclick = () => {
+            currentZoom = 100;
+            zoomValue.innerText = "100%";
+            const allContainers = document.querySelectorAll('.right-panel .container');
+            allContainers.forEach(c => c.style.transform = "scale(1)");
+        };
+
+        zoomControl.append(zoomLabel, zoomOutBtn, zoomValue, zoomInBtn, zoomResetBtn);
+        zoomRow.appendChild(zoomControl);
+        
+        leftHeader.append(headerTop, headerButtons, zoomRow);
 
         const leftContent = document.createElement("div");
         leftContent.setAttribute("class", "left-panel-content");
