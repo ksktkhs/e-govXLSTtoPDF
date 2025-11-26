@@ -331,205 +331,175 @@
             font-size: 18px !important;
         }
 
-        /* ===== ドロップゾーン（モダンデザイン） ===== */
+        /* ===== ドロップゾーン（白基調シンプルデザイン） ===== */
         .drop-zone {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            gap: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            padding: 40px 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .drop-zone::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 50h100M50 0v100" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></svg>');
-            background-size: 100px 100px;
-            opacity: 0.3;
+            gap: 48px;
+            background: #ffffff !important;
+            padding: 60px 20px;
         }
 
         .drop-zone-header {
             text-align: center;
-            z-index: 1;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.02);
-            }
+            max-width: 800px;
         }
 
         .drop-zone-title {
-            font-size: 48px !important;
-            font-weight: 800;
-            color: white !important;
+            font-size: 42px !important;
+            font-weight: 700;
+            color: #1a1a1a !important;
             margin-bottom: 16px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .drop-zone-subtitle {
-            font-size: 20px !important;
-            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 18px !important;
+            color: #666 !important;
             margin-bottom: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
             font-weight: 400;
         }
 
         .drop-zone-content {
-            z-index: 1;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
         }
 
         .drop-label {
-            padding: 60px 80px;
+            width: 100%;
+            padding: 80px 40px;
             font-size: 18px !important;
-            border: 3px dashed rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
+            border: 3px dashed #d0d0d0;
+            border-radius: 16px;
+            background: #fafafa !important;
             cursor: pointer;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            color: white !important;
+            color: #333 !important;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            font-weight: 600;
+            font-weight: 500;
+            text-align: center;
         }
 
         .drop-label:hover {
-            background: rgba(255, 255, 255, 0.2) !important;
-            border-color: rgba(255, 255, 255, 0.8);
-            transform: translateY(-4px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            background: #f0f0f0 !important;
+            border-color: #2196f3;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.1);
         }
 
-        .drop-label:active {
-            transform: translateY(-2px);
+        .drop-label small {
+            display: block;
+            margin-top: 12px;
+            font-size: 14px !important;
+            color: #999 !important;
+            font-weight: 400;
         }
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            max-width: 900px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
             width: 100%;
-            z-index: 1;
-            animation: fadeInUp 0.8s ease-out 0.4s both;
+            max-width: 1000px;
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            padding: 24px;
-            border-radius: 16px;
+            background: #f8f9fa !important;
+            padding: 32px 24px;
+            border-radius: 12px;
             text-align: center;
-            color: white !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #e9ecef;
             transition: all 0.3s ease;
         }
 
         .feature-card:hover {
-            background: rgba(255, 255, 255, 0.15) !important;
+            background: #ffffff !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
             transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .feature-icon {
-            font-size: 32px !important;
-            margin-bottom: 12px;
-            opacity: 0.9;
+            font-size: 36px !important;
+            margin-bottom: 16px;
         }
 
         .feature-title {
             font-size: 16px !important;
             font-weight: 600;
+            color: #1a1a1a !important;
             margin-bottom: 8px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
         }
 
         .feature-desc {
-            font-size: 13px !important;
-            opacity: 0.8;
+            font-size: 14px !important;
+            color: #666 !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
             line-height: 1.5;
         }
 
         .instructions {
-            max-width: 700px;
-            padding: 24px 32px;
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
+            max-width: 800px;
+            padding: 32px;
+            background: #f8f9fa !important;
+            border-radius: 12px;
             margin: 10px;
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white !important;
-            z-index: 1;
-            animation: fadeInUp 0.8s ease-out 0.6s both;
+            border: 1px solid #e9ecef;
+            color: #333 !important;
         }
 
         .instructions h3 {
             margin-top: 0;
-            color: white !important;
+            color: #1a1a1a !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            font-size: 18px !important;
-            margin-bottom: 16px;
+            font-size: 20px !important;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .instructions ol, .instructions ul {
             text-align: left;
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: #555 !important;
+            padding-left: 24px;
         }
 
         .instructions li {
-            margin: 8px 0;
-            line-height: 1.6;
+            margin: 12px 0;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1024px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
+            .drop-zone {
+                padding: 40px 20px;
+                gap: 32px;
+            }
+
             .drop-zone-title {
-                font-size: 36px !important;
+                font-size: 32px !important;
             }
             
+            .drop-zone-subtitle {
+                font-size: 16px !important;
+            }
+
             .drop-label {
-                padding: 40px 50px;
+                padding: 60px 30px;
                 font-size: 16px !important;
             }
 
