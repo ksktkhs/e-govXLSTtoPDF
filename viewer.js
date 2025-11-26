@@ -632,7 +632,7 @@ const renderUI = () => {
 
     const title = document.createElement("h1");
     title.setAttribute("class", "drop-zone-title");
-    title.innerText = "電子公文書 PDF変換システム";
+    title.innerText = "電子公文書XML Viewer";
     header.appendChild(title);
 
     const subtitle = document.createElement("p");
