@@ -593,7 +593,12 @@ const renderPreview = (uniqueKey, pairData) => {
             // グローバル倍率設定を適用
             container.style.transform = `scale(${globalZoom / 100})`;
             
-            rightPanel.append(container);
+            // transformによるレイアウトの崩れを防ぐためのラッパー
+            const wrapper = document.createElement("div");
+            wrapper.style.cssText = `display: inline-block; width: 100%;`;
+            wrapper.appendChild(container);
+            
+            rightPanel.append(wrapper);
         });
     });
 };
