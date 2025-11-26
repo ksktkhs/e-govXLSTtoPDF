@@ -655,12 +655,12 @@ const renderUI = () => {
 
     const title = document.createElement("h1");
     title.setAttribute("class", "drop-zone-title");
-    title.innerText = "📄 電子公文書 PDF変換";
+    title.innerText = "電子公文書 PDF変換システム";
     header.appendChild(title);
 
     const subtitle = document.createElement("p");
     subtitle.setAttribute("class", "drop-zone-subtitle");
-    subtitle.innerText = "ブラウザで完結する XML/XSL PDF変換ツール";
+    subtitle.innerText = "XML/XSLファイルをブラウザでPDFに変換";
     header.appendChild(subtitle);
 
     dropZone.appendChild(header);
@@ -671,7 +671,7 @@ const renderUI = () => {
 
     const fileLabel = document.createElement("label");
     fileLabel.setAttribute("class", "drop-label");
-    fileLabel.innerHTML = "📁 ファイル・フォルダ・ZIPをドロップ<br><small style=\'font-size: 14px; opacity: 0.8; font-weight: 400;\'>またはクリックして選択</small>";
+    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style=\'font-size: 14px; opacity: 0.8; font-weight: 400;\'>またはクリックして選択</small>";
 
     const fileInput = document.createElement("input");
     fileInput.setAttribute("type", "file");
@@ -688,30 +688,6 @@ const renderUI = () => {
     content.appendChild(fileLabel);
 
     dropZone.appendChild(content);
-
-    // 機能カード
-    const featureGrid = document.createElement("div");
-    featureGrid.setAttribute("class", "feature-grid");
-
-    const features = [
-        { icon: "⚡", title: "高速変換", desc: "ブラウザ内で即座に変換" },
-        { icon: "🔒", title: "安全", desc: "ファイルは外部送信されません" },
-        { icon: "📦", title: "ZIP対応", desc: "ZIP自動展開・一括処理" },
-        { icon: "🎯", title: "自動ペア", desc: "XML/XSLを自動マッチング" }
-    ];
-
-    features.forEach(feature => {
-        const card = document.createElement("div");
-        card.setAttribute("class", "feature-card");
-        card.innerHTML = `
-            <div class="feature-icon">${feature.icon}</div>
-            <div class="feature-title">${feature.title}</div>
-            <div class="feature-desc">${feature.desc}</div>
-        `;
-        featureGrid.appendChild(card);
-    });
-
-    dropZone.appendChild(featureGrid);
 
     if (completePairs.length > 0) {
         const splitView = document.createElement("div");
