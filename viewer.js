@@ -201,7 +201,8 @@ const addFilesToStorage = async (files) => {
             xmlFolder = xmlFile.webkitRelativePath.substring(0, xmlFile.webkitRelativePath.lastIndexOf('/'));
         }
         
-        console.log(`XSL自動検出開始: ${xmlFile.name}, basename: ${xmlBasename}, フォルダ: "${xmlFolder}"`);
+        const hasFolder = xmlFolder !== '';
+        console.log(`XSL自動検出開始: ${xmlFile.name}, basename: ${xmlBasename}, フォルダ: "${xmlFolder}" (${hasFolder ? 'フォルダ選択' : 'ファイル選択/ドロップ'})`);
         
         for (const item of processedFilesList) {
             const file = item.file;
@@ -215,9 +216,20 @@ const addFilesToStorage = async (files) => {
             
             console.log(`  チェック中: ${file.name}, basename: ${xslBasename}, フォルダ: "${xslFolder}"`);
             
-            // 同じフォルダで、basenameが一致するXSLを探す
-            if (xmlFolder === xslFolder && xmlBasename === xslBasename) {
-                console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name}`);
+            // basename が一致するかチェック
+            if (xmlBasename !== xslBasename) {
+                continue;
+            }
+            
+            // フォルダパスがある場合は、フォルダも一致する必要がある
+            // フォルダパスがない場合（ファイル選択/ドロップ）は、basenameだけで判定
+            if (hasFolder) {
+                if (xmlFolder === xslFolder) {
+                    console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name} (同じフォルダ)`);
+                    return file;
+                }
+            } else {
+                console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name} (basename一致)`);
                 return file;
             }
         }
