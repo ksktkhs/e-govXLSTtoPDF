@@ -600,31 +600,50 @@ const renderPreview = (uniqueKey, pairData) => {
             printBtn.onclick = () => window.print();
 
             // 倍率調整コントロール
+            let currentZoom = 100;
+            
             const zoomControl = document.createElement("div");
             zoomControl.setAttribute("class", "zoom-control");
 
             const zoomLabel = document.createElement("label");
-            zoomLabel.innerText = "表示倍率:";
+            zoomLabel.innerText = "表示:";
 
-            const zoomSlider = document.createElement("input");
-            zoomSlider.setAttribute("type", "range");
-            zoomSlider.setAttribute("class", "zoom-slider");
-            zoomSlider.setAttribute("min", "30");
-            zoomSlider.setAttribute("max", "150");
-            zoomSlider.setAttribute("value", "100");
-            zoomSlider.setAttribute("step", "5");
+            const zoomOutBtn = document.createElement("button");
+            zoomOutBtn.setAttribute("class", "zoom-btn");
+            zoomOutBtn.innerText = "−";
+            zoomOutBtn.onclick = () => {
+                if (currentZoom > 30) {
+                    currentZoom -= 10;
+                    zoomValue.innerText = `${currentZoom}%`;
+                    container.style.transform = `scale(${currentZoom / 100})`;
+                }
+            };
 
             const zoomValue = document.createElement("span");
             zoomValue.setAttribute("class", "zoom-value");
             zoomValue.innerText = "100%";
 
-            zoomSlider.oninput = (e) => {
-                const zoomPercent = e.target.value;
-                zoomValue.innerText = `${zoomPercent}%`;
-                container.style.transform = `scale(${zoomPercent / 100})`;
+            const zoomInBtn = document.createElement("button");
+            zoomInBtn.setAttribute("class", "zoom-btn");
+            zoomInBtn.innerText = "＋";
+            zoomInBtn.onclick = () => {
+                if (currentZoom < 150) {
+                    currentZoom += 10;
+                    zoomValue.innerText = `${currentZoom}%`;
+                    container.style.transform = `scale(${currentZoom / 100})`;
+                }
             };
 
-            zoomControl.append(zoomLabel, zoomSlider, zoomValue);
+            const zoomResetBtn = document.createElement("button");
+            zoomResetBtn.setAttribute("class", "zoom-btn");
+            zoomResetBtn.innerText = "100%";
+            zoomResetBtn.onclick = () => {
+                currentZoom = 100;
+                zoomValue.innerText = "100%";
+                container.style.transform = "scale(1)";
+            };
+
+            zoomControl.append(zoomLabel, zoomOutBtn, zoomValue, zoomInBtn, zoomResetBtn);
 
             leftSection.append(countLabel, printBtn, zoomControl);
             header.append(leftSection);

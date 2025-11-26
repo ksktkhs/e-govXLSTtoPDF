@@ -30,9 +30,9 @@
         }
 
         .container.landscape {
-            /* A4横もA4縦と同じ幅で表示（比率は維持） */
-            width: 210mm;
-            min-height: calc(210mm * 210 / 297);
+            /* A4横は横表示 */
+            width: 297mm;
+            min-height: 210mm;
         }
 
         .container>div {
@@ -92,8 +92,8 @@
         .zoom-control {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            gap: 6px;
+            padding: 4px 8px;
             background: #fafafa;
             border-radius: 4px;
             border: 1px solid #ddd;
@@ -101,46 +101,38 @@
         }
 
         .zoom-control label {
-            font-size: 13px !important;
+            font-size: 12px !important;
             color: #555 !important;
             margin: 0;
         }
 
-        .zoom-slider {
-            width: 120px;
-            height: 4px;
+        .zoom-btn {
+            padding: 4px 10px;
+            background: #fff;
+            color: #333 !important;
+            border: 1px solid #ccc;
+            border-radius: 3px;
             cursor: pointer;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #d3d3d3;
-            outline: none;
-            border-radius: 2px;
+            font-size: 12px !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            transition: all 0.2s;
         }
 
-        .zoom-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #2196f3;
-            cursor: pointer;
-            border-radius: 50%;
+        .zoom-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
         }
 
-        .zoom-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #2196f3;
-            cursor: pointer;
-            border-radius: 50%;
-            border: none;
+        .zoom-btn:active {
+            background: #e0e0e0;
         }
 
         .zoom-value {
-            font-size: 13px !important;
+            font-size: 12px !important;
             color: #333 !important;
-            min-width: 40px;
-            text-align: right;
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
         }
 
         .home-btn {
@@ -293,8 +285,8 @@
         }
 
         .right-panel .container.landscape {
-            /* A4横も縦と同じ最大幅に制限 */
-            max-width: 210mm;
+            /* A4横は横幅で表示 */
+            max-width: 297mm;
         }
 
         .left-panel-header {
