@@ -649,20 +649,29 @@ const renderUI = () => {
     const dropZone = document.createElement("div");
     dropZone.setAttribute("class", "drop-zone");
 
+    // ヘッダーセクション
+    const header = document.createElement("div");
+    header.setAttribute("class", "drop-zone-header");
+
     const title = document.createElement("h1");
     title.setAttribute("class", "drop-zone-title");
-    title.innerText = "電子公文書 PDF変換システム";
-    dropZone.appendChild(title);
+    title.innerText = "📄 電子公文書 PDF変換";
+    header.appendChild(title);
 
     const subtitle = document.createElement("p");
     subtitle.setAttribute("class", "drop-zone-subtitle");
-    subtitle.innerText = "XML/XSLファイルをアップロードしてPDFに変換";
-    dropZone.appendChild(subtitle);
+    subtitle.innerText = "ブラウザで完結する XML/XSL PDF変換ツール";
+    header.appendChild(subtitle);
+
+    dropZone.appendChild(header);
+
+    // メインコンテンツ
+    const content = document.createElement("div");
+    content.setAttribute("class", "drop-zone-content");
 
     const fileLabel = document.createElement("label");
     fileLabel.setAttribute("class", "drop-label");
-    fileLabel.innerText = "ファイル・フォルダ・ZIPをドラッグアンドドロップで追加";
-    fileLabel.style.cssText = "display: inline-block; margin: 5px;";
+    fileLabel.innerHTML = "📁 ファイル・フォルダ・ZIPをドロップ<br><small style=\'font-size: 14px; opacity: 0.8; font-weight: 400;\'>またはクリックして選択</small>";
 
     const fileInput = document.createElement("input");
     fileInput.setAttribute("type", "file");
@@ -676,35 +685,33 @@ const renderUI = () => {
     };
 
     fileLabel.appendChild(fileInput);
+    content.appendChild(fileLabel);
 
-    const buttonContainer = document.createElement("div");
-    buttonContainer.style.cssText = "display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;";
-    buttonContainer.appendChild(fileLabel);
+    dropZone.appendChild(content);
 
-    if (completePairs.length > 0) {
-        const clearBtnTop = document.createElement("button");
-        clearBtnTop.setAttribute("class", "drop-label");
-        clearBtnTop.style.cssText = "background: #f44336; color: white; border: none; display: inline-block; margin: 5px;";
-        clearBtnTop.innerText = "クリア";
-        clearBtnTop.onclick = () => {
-            if (confirm('すべてのファイルをクリアしますか？\n（アップロードしたファイルがすべて削除されます）')) {
-                fileStorage.clear();
-                xslCache.clear();
-                xmlPool.clear();
-                processedFileKeys.clear();
-                renderUI();
-            }
-        };
-        clearBtnTop.onmouseover = () => {
-            clearBtnTop.style.background = "#d32f2f";
-        };
-        clearBtnTop.onmouseout = () => {
-            clearBtnTop.style.background = "#f44336";
-        };
-        buttonContainer.appendChild(clearBtnTop);
-    }
+    // 機能カード
+    const featureGrid = document.createElement("div");
+    featureGrid.setAttribute("class", "feature-grid");
 
-    dropZone.appendChild(buttonContainer);
+    const features = [
+        { icon: "⚡", title: "高速変換", desc: "ブラウザ内で即座に変換" },
+        { icon: "🔒", title: "安全", desc: "ファイルは外部送信されません" },
+        { icon: "📦", title: "ZIP対応", desc: "ZIP自動展開・一括処理" },
+        { icon: "🎯", title: "自動ペア", desc: "XML/XSLを自動マッチング" }
+    ];
+
+    features.forEach(feature => {
+        const card = document.createElement("div");
+        card.setAttribute("class", "feature-card");
+        card.innerHTML = `
+            <div class="feature-icon">${feature.icon}</div>
+            <div class="feature-title">${feature.title}</div>
+            <div class="feature-desc">${feature.desc}</div>
+        `;
+        featureGrid.appendChild(card);
+    });
+
+    dropZone.appendChild(featureGrid);
 
     if (completePairs.length > 0) {
         const splitView = document.createElement("div");
