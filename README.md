@@ -1,32 +1,28 @@
-# 電子公文書 PDF変換システム
+# e-govXLSTtoPDF
 
-XML/XSLファイルをブラウザでプレビュー・PDF変換するシンプルなWebアプリケーション
+XML/XSL viewer and PDF converter for electronic public documents.
 
-## 公開URL
+## Demo
 
 https://ksktkhs.github.io/e-govXLSTtoPDF/
 
-## 機能
+## Features
 
-- **ドラッグ&ドロップ対応**: ファイル・フォルダ・ZIPを直接ドロップ
-- **ZIP自動展開**: ブラウザ内でZIPファイルを自動展開
-- **自動ペアリング**: ファイル名でXMLとXSLを自動マッチング
-- **リアルタイムプレビュー**: クリックするだけで即座にプレビュー
-- **PDF保存**: ブラウザの印刷機能で簡単PDF化
-- **2分割UI**: リサイズ可能なパネルレイアウト
+- Drag & drop support (files, folders, ZIP)
+- Auto-pairing XML/XSL files
+- Real-time preview
+- PDF export via browser print
 
-## 使い方
+## Usage
 
-1. ファイル・フォルダ・ZIPをドラッグ&ドロップ
-2. 左側の一覧からファイルをクリック
-3. 右側にプレビューが表示されます
-4. 「PDFとして保存」ボタンで印刷ダイアログを開く
-5. 「PDFに保存」を選択して保存
+1. Drop XML/XSL files or ZIP
+2. Click file in list
+3. Preview and print to PDF
 
-## ライセンス
+## License
 
 MIT License
 
-## 作成者
+## Author
 
-Created by Keisuke Takahashi
+Keisuke Takahashi
