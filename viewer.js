@@ -194,22 +194,34 @@ const addFilesToStorage = async (files) => {
     // XMLファイルの同じフォルダにあるXSLを自動検出する関数
     const findMatchingXSL = (xmlFile, processedFilesList) => {
         const xmlBasename = xmlFile.name.replace(/\.xml$/, '');
-        const xmlFolder = xmlFile.webkitRelativePath ? 
-            xmlFile.webkitRelativePath.substring(0, xmlFile.webkitRelativePath.lastIndexOf('/')) : '';
+        
+        // webkitRelativePath からフォルダパスを取得（最後の/より前）
+        let xmlFolder = '';
+        if (xmlFile.webkitRelativePath && xmlFile.webkitRelativePath.includes('/')) {
+            xmlFolder = xmlFile.webkitRelativePath.substring(0, xmlFile.webkitRelativePath.lastIndexOf('/'));
+        }
+        
+        console.log(`XSL自動検出開始: ${xmlFile.name}, basename: ${xmlBasename}, フォルダ: "${xmlFolder}"`);
         
         for (const item of processedFilesList) {
             const file = item.file;
             if (!file.name.endsWith('.xsl')) continue;
+            
             const xslBasename = file.name.replace(/\.xsl$/, '');
-            const xslFolder = file.webkitRelativePath ? 
-                file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/')) : '';
+            let xslFolder = '';
+            if (file.webkitRelativePath && file.webkitRelativePath.includes('/')) {
+                xslFolder = file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/'));
+            }
+            
+            console.log(`  チェック中: ${file.name}, basename: ${xslBasename}, フォルダ: "${xslFolder}"`);
             
             // 同じフォルダで、basenameが一致するXSLを探す
             if (xmlFolder === xslFolder && xmlBasename === xslBasename) {
-                console.log(`XSL自動検出: ${xmlFile.name} (フォルダ: ${xmlFolder}) -> ${file.name}`);
+                console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name}`);
                 return file;
             }
         }
+        console.log(`  ❌ マッチするXSLが見つかりませんでした`);
         return null;
     };
 
@@ -685,47 +697,22 @@ const renderUI = () => {
 
     const fileLabel = document.createElement("label");
     fileLabel.setAttribute("class", "drop-label");
-    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style='font-size: 14px; opacity: 0.8; font-weight: 400;'>またはクリックして選択</small>";
+    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style='font-size: 14px; opacity: 0.8; font-weight: 400;'>またはクリックしてフォルダ選択</small>";
 
-    // ファイル選択用input（隠し）
+    // フォルダ選択用input（クリック時用）
     const fileInput = document.createElement("input");
     fileInput.setAttribute("type", "file");
-    fileInput.setAttribute("id", "file-input-files");
+    fileInput.setAttribute("id", "file-input-folder");
     fileInput.setAttribute("class", "file-input");
     fileInput.setAttribute("multiple", "true");
-    fileInput.setAttribute("accept", ".xml,.xsl,.zip");
-    fileInput.style.display = "none";
+    fileInput.setAttribute("webkitdirectory", "");
+    fileInput.setAttribute("directory", "");
     fileInput.onchange = (e) => {
         addFilesToStorage(Array.from(e.target.files));
         e.target.value = '';
     };
 
-    // フォルダ選択用input（隠し）
-    const folderInput = document.createElement("input");
-    folderInput.setAttribute("type", "file");
-    folderInput.setAttribute("id", "file-input-folder");
-    folderInput.setAttribute("class", "file-input");
-    folderInput.setAttribute("multiple", "true");
-    folderInput.setAttribute("webkitdirectory", "");
-    folderInput.setAttribute("directory", "");
-    folderInput.style.display = "none";
-    folderInput.onchange = (e) => {
-        addFilesToStorage(Array.from(e.target.files));
-        e.target.value = '';
-    };
-
-    // クリック時の選択ボタン（ファイルまたはフォルダ）
-    fileLabel.onclick = (e) => {
-        e.preventDefault();
-        if (confirm('ファイルを選択しますか？\n\n「OK」= ファイル選択\n「キャンセル」= フォルダ選択')) {
-            fileInput.click();
-        } else {
-            folderInput.click();
-        }
-    };
-
-    content.appendChild(fileInput);
-    content.appendChild(folderInput);
+    fileLabel.appendChild(fileInput);
     content.appendChild(fileLabel);
 
     dropZone.appendChild(content);
@@ -773,13 +760,7 @@ const renderUI = () => {
         addFileBtn.setAttribute("class", "home-btn");
         addFileBtn.style.cssText = "padding: 4px 8px; font-size: 11px;";
         addFileBtn.innerText = "追加";
-        addFileBtn.onclick = () => {
-            if (confirm('ファイルを追加しますか？\n\n「OK」= ファイル選択\n「キャンセル」= フォルダ選択')) {
-                document.getElementById('file-input-files').click();
-            } else {
-                document.getElementById('file-input-folder').click();
-            }
-        };
+        addFileBtn.onclick = () => document.getElementById('file-input-folder').click();
 
         const clearBtn = document.createElement("button");
         clearBtn.setAttribute("class", "home-btn");
@@ -874,13 +855,7 @@ const renderUI = () => {
         const dropArea = document.createElement("div");
         dropArea.setAttribute("class", "drop-area-compact");
         dropArea.innerHTML = "ファイル・フォルダ・zipファイル<br><small style='color: #999; font-size: 10px;'>をドラッグ&ドロップしてください</small>";
-        dropArea.onclick = () => {
-            if (confirm('ファイルを選択しますか？\n\n「OK」= ファイル選択\n「キャンセル」= フォルダ選択')) {
-                document.getElementById('file-input-files').click();
-            } else {
-                document.getElementById('file-input-folder').click();
-            }
-        };
+        dropArea.onclick = () => document.getElementById('file-input-folder').click();
 
         dropArea.ondragover = (e) => {
             e.preventDefault();
