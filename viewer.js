@@ -1066,6 +1066,14 @@ const renderUI = () => {
 
     dropZone.appendChild(instructions);
     body.appendChild(dropZone);
+
+    // フッター（トップページのみ表示）
+    if (completePairs.length === 0) {
+        const footer = document.createElement("div");
+        footer.setAttribute("class", "footer");
+        footer.innerText = "© 2024 Keisuke Takahashi. All rights reserved.";
+        body.appendChild(footer);
+    }
 };
 
 window.onload = () => {
