@@ -1,5 +1,5 @@
 // グローバル倍率設定（ファイル切り替え時も維持）
-let globalZoom = 100;
+let globalZoom = 90;
 
 const decompressZip = async (arrayBuffer) => {
     async function decompressData(compressedData) {
