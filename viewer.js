@@ -1,3 +1,6 @@
+// グローバル倍率設定（ファイル切り替え時も維持）
+let globalZoom = 100;
+
 const decompressZip = async (arrayBuffer) => {
     async function decompressData(compressedData) {
         const reader = new Blob([compressedData])
@@ -621,6 +624,10 @@ const renderPreview = (uniqueKey, pairData) => {
             }
 
             container.append(header, infoSection, contents);
+            
+            // グローバル倍率設定を適用
+            container.style.transform = `scale(${globalZoom / 100})`;
+            
             rightPanel.append(container);
         });
     });
@@ -748,8 +755,6 @@ const renderUI = () => {
         headerButtons.append(addFileBtn, clearBtn);
         
         // 倍率調整コントロール
-        let currentZoom = 100;
-        
         const zoomRow = document.createElement("div");
         zoomRow.style.cssText = "display: flex; gap: 4px; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;";
         
@@ -758,37 +763,37 @@ const renderUI = () => {
         zoomControl.style.cssText = "display: flex; align-items: center; gap: 4px; padding: 3px 6px; background: #fafafa; border-radius: 3px; border: 1px solid #ddd; flex: 1;";
 
         const zoomLabel = document.createElement("label");
-        zoomLabel.style.cssText = "font-size: 11px !important; color: #555 !important; margin: 0;";
-        zoomLabel.innerText = "表示:";
+        zoomLabel.style.cssText = "font-size: 10px !important; color: #555 !important; margin: 0; white-space: nowrap;";
+        zoomLabel.innerText = "ビューワー表示倍率:";
 
         const zoomOutBtn = document.createElement("button");
         zoomOutBtn.setAttribute("class", "zoom-btn");
         zoomOutBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
         zoomOutBtn.innerText = "−";
         zoomOutBtn.onclick = () => {
-            if (currentZoom > 30) {
-                currentZoom -= 10;
-                zoomValue.innerText = `${currentZoom}%`;
+            if (globalZoom > 30) {
+                globalZoom -= 10;
+                zoomValue.innerText = `${globalZoom}%`;
                 const allContainers = document.querySelectorAll('.right-panel .container');
-                allContainers.forEach(c => c.style.transform = `scale(${currentZoom / 100})`);
+                allContainers.forEach(c => c.style.transform = `scale(${globalZoom / 100})`);
             }
         };
 
         const zoomValue = document.createElement("span");
         zoomValue.setAttribute("class", "zoom-value");
         zoomValue.style.cssText = "font-size: 11px !important; color: #333 !important; min-width: 35px; text-align: center; font-weight: 600;";
-        zoomValue.innerText = "100%";
+        zoomValue.innerText = `${globalZoom}%`;
 
         const zoomInBtn = document.createElement("button");
         zoomInBtn.setAttribute("class", "zoom-btn");
         zoomInBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
         zoomInBtn.innerText = "＋";
         zoomInBtn.onclick = () => {
-            if (currentZoom < 150) {
-                currentZoom += 10;
-                zoomValue.innerText = `${currentZoom}%`;
+            if (globalZoom < 150) {
+                globalZoom += 10;
+                zoomValue.innerText = `${globalZoom}%`;
                 const allContainers = document.querySelectorAll('.right-panel .container');
-                allContainers.forEach(c => c.style.transform = `scale(${currentZoom / 100})`);
+                allContainers.forEach(c => c.style.transform = `scale(${globalZoom / 100})`);
             }
         };
 
@@ -797,7 +802,7 @@ const renderUI = () => {
         zoomResetBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
         zoomResetBtn.innerText = "100%";
         zoomResetBtn.onclick = () => {
-            currentZoom = 100;
+            globalZoom = 100;
             zoomValue.innerText = "100%";
             const allContainers = document.querySelectorAll('.right-panel .container');
             allContainers.forEach(c => c.style.transform = "scale(1)");
