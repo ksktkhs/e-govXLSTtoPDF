@@ -191,6 +191,26 @@ const addFilesToStorage = async (files) => {
         return null;
     };
 
+    // XMLファイルの同じフォルダにあるXSLを自動検出する関数
+    const findMatchingXSL = (xmlFile, allFiles) => {
+        const xmlBasename = xmlFile.name.replace(/\.xml$/, '');
+        const xmlFolder = xmlFile.webkitRelativePath ? 
+            xmlFile.webkitRelativePath.substring(0, xmlFile.webkitRelativePath.lastIndexOf('/')) : '';
+        
+        for (const file of allFiles) {
+            if (!file.name.endsWith('.xsl')) continue;
+            const xslBasename = file.name.replace(/\.xsl$/, '');
+            const xslFolder = file.webkitRelativePath ? 
+                file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/')) : '';
+            
+            // 同じフォルダで、basenameが一致するXSLを探す
+            if (xmlFolder === xslFolder && xmlBasename === xslBasename) {
+                return file;
+            }
+        }
+        return null;
+    };
+
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const folderName = extractFolderName(file);
@@ -249,7 +269,22 @@ const addFilesToStorage = async (files) => {
 
     for (const { file: xmlFile, sourceIndex, sourceType, sourceName, folderName } of xmlFiles) {
         const basename = xmlFile.name.replace(/\.xml$/, '');
-        const xslData = xslCache.get(basename);
+        let xslData = xslCache.get(basename);
+
+        // XSL が見つからない場合、同じフォルダ内を自動検索
+        if (!xslData) {
+            const matchingXSL = findMatchingXSL(xmlFile, files);
+            if (matchingXSL) {
+                const xslText = await matchingXSL.text();
+                const xslParser = new DOMParser();
+                const xslDoc = xslParser.parseFromString(xslText, 'application/xml');
+                const titleElement = xslDoc.querySelector('title');
+                const title = titleElement ? titleElement.textContent.trim() : '';
+                xslData = { file: matchingXSL, title: title };
+                xslCache.set(basename, xslData);
+                console.log(`自動検出: ${xmlFile.name} に対応する ${matchingXSL.name} を発見`);
+            }
+        }
 
         const text = await xmlFile.text();
         const parser = new DOMParser();
@@ -654,8 +689,8 @@ const renderUI = () => {
     fileInput.setAttribute("type", "file");
     fileInput.setAttribute("class", "file-input");
     fileInput.setAttribute("multiple", "true");
-    fileInput.setAttribute("webkitdirectory", "");
-    fileInput.setAttribute("directory", "");
+    fileInput.setAttribute("accept", ".xml,.xsl,.zip");
+    // webkitdirectory と directory 属性を削除してファイル選択も可能に
     fileInput.onchange = (e) => {
         addFilesToStorage(Array.from(e.target.files));
         e.target.value = '';
