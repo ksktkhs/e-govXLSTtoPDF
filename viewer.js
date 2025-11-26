@@ -717,16 +717,21 @@ const renderUI = () => {
         clearBtn.onmouseover = () => { clearBtn.style.background = "#d32f2f"; };
         clearBtn.onmouseout = () => { clearBtn.style.background = "#f44336"; };
 
-        // PDF保存ボタンを追加
+        headerButtons.append(addFileBtn, clearBtn);
+        
+        // PDF保存ボタン（右側に独立配置）
+        const printBtnContainer = document.createElement("div");
+        printBtnContainer.style.cssText = "display: flex; justify-content: flex-end; margin-top: 6px;";
+        
         const printBtn = document.createElement("button");
         printBtn.setAttribute("class", "home-btn");
-        printBtn.style.cssText = "background: #4caf50; padding: 4px 8px; font-size: 11px;";
+        printBtn.style.cssText = "background: #4caf50; padding: 4px 12px; font-size: 11px;";
         printBtn.innerText = "PDFとして保存";
         printBtn.onclick = () => window.print();
         printBtn.onmouseover = () => { printBtn.style.background = "#45a049"; };
         printBtn.onmouseout = () => { printBtn.style.background = "#4caf50"; };
-
-        headerButtons.append(addFileBtn, printBtn, clearBtn);
+        
+        printBtnContainer.appendChild(printBtn);
         
         // 倍率調整コントロール
         const zoomRow = document.createElement("div");
@@ -785,7 +790,7 @@ const renderUI = () => {
         zoomControl.append(zoomLabel, zoomOutBtn, zoomValue, zoomInBtn, zoomResetBtn);
         zoomRow.appendChild(zoomControl);
         
-        leftHeader.append(headerTop, headerButtons, zoomRow);
+        leftHeader.append(headerTop, headerButtons, printBtnContainer, zoomRow);
 
         const leftContent = document.createElement("div");
         leftContent.setAttribute("class", "left-panel-content");
