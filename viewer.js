@@ -676,27 +676,22 @@ const renderUI = () => {
         const leftHeader = document.createElement("div");
         leftHeader.setAttribute("class", "left-panel-header");
 
-        // 1段目：ファイル一覧(x件) と PDFとして保存
+        // 1段目：ファイル一覧(x件)
         const headerTop = document.createElement("div");
-        headerTop.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;";
+        headerTop.style.cssText = "margin-bottom: 6px;";
 
         const headerTitle = document.createElement("h3");
         headerTitle.style.cssText = "margin: 0; color: #333;";
         headerTitle.innerText = `ファイル一覧 (${completePairs.length}件)`;
 
-        const printBtn = document.createElement("button");
-        printBtn.setAttribute("class", "home-btn");
-        printBtn.style.cssText = "background: #4caf50; padding: 4px 12px; font-size: 11px;";
-        printBtn.innerText = "PDFとして保存";
-        printBtn.onclick = () => window.print();
-        printBtn.onmouseover = () => { printBtn.style.background = "#45a049"; };
-        printBtn.onmouseout = () => { printBtn.style.background = "#4caf50"; };
+        headerTop.appendChild(headerTitle);
 
-        headerTop.append(headerTitle, printBtn);
-
-        // 2段目：トップに戻る 追加 全削除
+        // 2段目：トップに戻る 追加 全削除 と PDFとして保存（右端）
         const headerButtons = document.createElement("div");
-        headerButtons.style.cssText = "display: flex; gap: 4px;";
+        headerButtons.style.cssText = "display: flex; gap: 4px; justify-content: space-between; align-items: center;";
+
+        const leftButtons = document.createElement("div");
+        leftButtons.style.cssText = "display: flex; gap: 4px;";
 
         const backBtn = document.createElement("button");
         backBtn.setAttribute("class", "home-btn");
@@ -732,7 +727,17 @@ const renderUI = () => {
         clearBtn.onmouseover = () => { clearBtn.style.background = "#d32f2f"; };
         clearBtn.onmouseout = () => { clearBtn.style.background = "#f44336"; };
 
-        headerButtons.append(backBtn, addFileBtn, clearBtn);
+        leftButtons.append(backBtn, addFileBtn, clearBtn);
+
+        const printBtn = document.createElement("button");
+        printBtn.setAttribute("class", "home-btn");
+        printBtn.style.cssText = "background: #4caf50; padding: 4px 12px; font-size: 11px;";
+        printBtn.innerText = "PDFとして保存";
+        printBtn.onclick = () => window.print();
+        printBtn.onmouseover = () => { printBtn.style.background = "#45a049"; };
+        printBtn.onmouseout = () => { printBtn.style.background = "#4caf50"; };
+
+        headerButtons.append(leftButtons, printBtn);
         
         // 倍率調整コントロール
         const zoomRow = document.createElement("div");
