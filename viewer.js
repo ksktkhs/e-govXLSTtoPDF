@@ -587,43 +587,8 @@ const renderPreview = (uniqueKey, pairData) => {
             const isLandscape = pairData.basename.startsWith('2');
             container.setAttribute("class", isLandscape ? "container landscape" : "container");
 
-            const header = document.createElement("div");
-            header.setAttribute("class", "page-header");
-
-            const leftSection = document.createElement("div");
-            leftSection.setAttribute("class", "header-left");
-
-            const countLabel = document.createElement("span");
-            countLabel.style.cssText = "font-size: 14px; color: #666;";
-            countLabel.innerText = `${currentIndex + 1} / ${allKeys.length}`;
-
-            const printBtn = document.createElement("button");
-            printBtn.setAttribute("class", "print-btn");
-            printBtn.innerText = "PDFとして保存";
-            printBtn.onclick = () => window.print();
-
-            leftSection.append(countLabel, printBtn);
-            header.append(leftSection);
-
-            const infoSection = document.createElement("div");
-            infoSection.setAttribute("class", "info-section");
-            infoSection.style.cssText = "padding: 12px 16px; background: #f9f9f9; border-bottom: 1px solid #ddd;";
-
-            if (pairData.title) {
-                const titleDiv = document.createElement("div");
-                titleDiv.style.cssText = "font-size: 18px; font-weight: bold; color: #333; margin-bottom: 6px;";
-                titleDiv.innerText = pairData.title;
-                infoSection.appendChild(titleDiv);
-            }
-
-            if (pairData.jigyoushoName) {
-                const companyDiv = document.createElement("div");
-                companyDiv.style.cssText = "font-size: 16px; color: #555;";
-                companyDiv.innerText = pairData.jigyoushoName;
-                infoSection.appendChild(companyDiv);
-            }
-
-            container.append(header, infoSection, contents);
+            // 公文書のcontentsのみを追加
+            container.appendChild(contents);
             
             // グローバル倍率設定を適用
             container.style.transform = `scale(${globalZoom / 100})`;
@@ -752,7 +717,16 @@ const renderUI = () => {
         clearBtn.onmouseover = () => { clearBtn.style.background = "#d32f2f"; };
         clearBtn.onmouseout = () => { clearBtn.style.background = "#f44336"; };
 
-        headerButtons.append(addFileBtn, clearBtn);
+        // PDF保存ボタンを追加
+        const printBtn = document.createElement("button");
+        printBtn.setAttribute("class", "home-btn");
+        printBtn.style.cssText = "background: #4caf50; padding: 4px 8px; font-size: 11px;";
+        printBtn.innerText = "PDFとして保存";
+        printBtn.onclick = () => window.print();
+        printBtn.onmouseover = () => { printBtn.style.background = "#45a049"; };
+        printBtn.onmouseout = () => { printBtn.style.background = "#4caf50"; };
+
+        headerButtons.append(addFileBtn, printBtn, clearBtn);
         
         // 倍率調整コントロール
         const zoomRow = document.createElement("div");
