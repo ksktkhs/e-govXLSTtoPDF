@@ -709,16 +709,15 @@ const renderUI = () => {
 
     const fileLabel = document.createElement("label");
     fileLabel.setAttribute("class", "drop-label");
-    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style='font-size: 14px; opacity: 0.8; font-weight: 400;'>またはクリックしてフォルダ選択</small>";
+    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style='font-size: 14px; opacity: 0.8; font-weight: 400;'>またはクリックしてファイル選択</small>";
 
-    // フォルダ選択用input（クリック時用）
+    // ファイル選択用input（クリック時用、ZIP等の複数ファイル選択）
     const fileInput = document.createElement("input");
     fileInput.setAttribute("type", "file");
-    fileInput.setAttribute("id", "file-input-folder");
+    fileInput.setAttribute("id", "file-input-files");
     fileInput.setAttribute("class", "file-input");
     fileInput.setAttribute("multiple", "true");
-    fileInput.setAttribute("webkitdirectory", "");
-    fileInput.setAttribute("directory", "");
+    fileInput.setAttribute("accept", ".xml,.xsl,.zip");
     fileInput.onchange = (e) => {
         addFilesToStorage(Array.from(e.target.files));
         e.target.value = '';
@@ -772,7 +771,7 @@ const renderUI = () => {
         addFileBtn.setAttribute("class", "home-btn");
         addFileBtn.style.cssText = "padding: 4px 8px; font-size: 11px;";
         addFileBtn.innerText = "追加";
-        addFileBtn.onclick = () => document.getElementById('file-input-folder').click();
+        addFileBtn.onclick = () => document.getElementById('file-input-files').click();
 
         const clearBtn = document.createElement("button");
         clearBtn.setAttribute("class", "home-btn");
@@ -867,7 +866,7 @@ const renderUI = () => {
         const dropArea = document.createElement("div");
         dropArea.setAttribute("class", "drop-area-compact");
         dropArea.innerHTML = "ファイル・フォルダ・zipファイル<br><small style='color: #999; font-size: 10px;'>をドラッグ&ドロップしてください</small>";
-        dropArea.onclick = () => document.getElementById('file-input-folder').click();
+        dropArea.onclick = () => document.getElementById('file-input-files').click();
 
         dropArea.ondragover = (e) => {
             e.preventDefault();
