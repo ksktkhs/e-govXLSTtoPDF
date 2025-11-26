@@ -197,6 +197,11 @@
                 display: block !important;
             }
 
+            /* wrapperを透過して container を直接表示 */
+            .right-panel > div {
+                display: contents !important;
+            }
+
             .container {
                 width: 100% !important;
                 min-height: auto !important;
@@ -204,9 +209,11 @@
                 padding: 0 !important;
                 box-shadow: none !important;
                 background: white !important;
-                page-break-after: always;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
                 zoom: 0.92 !important;
                 transform: none !important;
+                display: block !important;
             }
 
             .container.landscape {
