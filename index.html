@@ -30,8 +30,9 @@
         }
 
         .container.landscape {
-            width: 297mm;
-            min-height: 210mm;
+            /* A4横もA4縦と同じ幅で表示（比率は維持） */
+            width: 210mm;
+            min-height: calc(210mm * 210 / 297);
         }
 
         .container>div {
@@ -229,6 +230,15 @@
             display: flex;
             justify-content: center;
             padding: 20px;
+        }
+
+        .right-panel .container {
+            max-width: 210mm;
+        }
+
+        .right-panel .container.landscape {
+            /* A4横も縦と同じ最大幅に制限 */
+            max-width: 210mm;
         }
 
         .left-panel-header {
