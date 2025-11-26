@@ -1,13 +1,403 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>XML / XSL PDF ビューア</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電子公文書 PDF変換システム</title>
+    <style>
+        /* ===== ベーススタイル（XSLの影響を受けないようにリセット） ===== */
+        html,
+        body {
+            min-height: 100%;
+            min-width: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #e0e0e0 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        /* ===== 公文書コンテナ（印刷対象） ===== */
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 0;
+            background: white !important;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            isolation: isolate;
+        }
+
+        .container.landscape {
+            width: 297mm;
+            min-height: 210mm;
+        }
+
+        .container>div {
+            background: white !important;
+            white-space: normal;
+        }
+
+        /* ===== XSL由来のpre要素スタイル ===== */
+        .container pre {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container pre.oshirase {
+            white-space: pre;
+            font-size: 7pt;
+            line-height: 11px;
+            letter-spacing: 0;
+            word-spacing: 0;
+            overflow: visible;
+        }
+
+        .container pre.kyouji {
+            white-space: pre;
+            letter-spacing: 0;
+            word-spacing: 0;
+        }
+
+        /* ===== UI要素（印刷時は非表示） ===== */
+        .page-header,
+        .info-section {
+            padding: 10px 16px;
+            background: #f5f5f5 !important;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 16px !important;
+            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .home-btn {
+            padding: 8px 16px;
+            background: #2196f3;
+            color: white !important;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .home-btn:hover {
+            background: #1976d2;
+        }
+
+        .print-btn {
+            padding: 8px 16px;
+            background: #4caf50;
+            color: white !important;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .print-btn:hover {
+            background: #45a049;
+        }
+
+        /* ===== 印刷スタイル ===== */
+        @media print {
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* UI要素を完全に隠す */
+            .split-view {
+                display: block !important;
+                height: auto !important;
+            }
+
+            .left-panel,
+            .resizer,
+            .page-header,
+            .info-section,
+            .preview-placeholder {
+                display: none !important;
+            }
+
+            /* 公文書のみを印刷 */
+            .right-panel {
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                display: block !important;
+            }
+
+            .container {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always;
+                zoom: 0.92 !important;
+            }
+
+            .container.landscape {
+                width: 100% !important;
+                min-height: auto !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 15mm 8mm 8mm 8mm;
+            }
+
+            .container:not(.landscape) {
+                page: portrait;
+            }
+
+            .container.landscape {
+                page: landscape;
+            }
+        }
+
+        /* ===== 分割ビュー ===== */
+        .split-view {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+
+        .resizer {
+            width: 5px;
+            background: #ddd;
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .resizer:hover {
+            background: #2196f3;
+        }
+
+        .left-panel {
+            width: 35%;
+            min-width: 300px;
+            max-width: 600px;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f5f5f5 !important;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+        }
+
+        .right-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: #e0e0e0 !important;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .left-panel-header {
+            padding: 6px 8px;
+            background: #fff !important;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .left-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px;
+        }
+
+        .drop-area-compact {
+            margin: 4px 0;
+            padding: 12px;
+            border: 2px dashed #999;
+            border-radius: 4px;
+            background: #fafafa !important;
+            text-align: center;
+            color: #666 !important;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .drop-area-compact:hover {
+            border-color: #2196f3;
+            background: #e3f2fd !important;
+            color: #1976d2 !important;
+        }
+
+        .drop-area-compact.drag-over {
+            border-color: #4caf50;
+            background: #e8f5e9 !important;
+            color: #2e7d32 !important;
+        }
+
+        .file-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 6px 8px;
+            margin: 3px 0;
+            background: #f9f9f9 !important;
+            border-radius: 3px;
+            border-left: 3px solid #4caf50;
+            display: flex;
+            gap: 6px;
+            align-items: flex-start;
+        }
+
+        .file-item:hover {
+            background: #e3f2fd !important;
+            transform: translateX(4px);
+        }
+
+        .file-item.active {
+            background: #bbdefb !important;
+            border-left-color: #2196f3 !important;
+        }
+
+        .file-item-content {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .pair-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex-shrink: 0;
+            align-self: flex-start;
+        }
+
+        .btn-delete {
+            padding: 3px 8px;
+            background: #f44336;
+            color: white !important;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px !important;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .preview-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #999;
+            font-size: 18px !important;
+        }
+
+        /* ===== ドロップゾーン ===== */
+        .drop-zone {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+            background: white !important;
+            padding: 20px;
+        }
+
+        .drop-zone-title {
+            font-size: 28px !important;
+            font-weight: bold;
+            color: #333 !important;
+            margin-bottom: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .drop-zone-subtitle {
+            font-size: 16px !important;
+            color: #666 !important;
+            margin-bottom: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .drop-label {
+            padding: 32px;
+            font-size: 1.5em !important;
+            border: 3px dashed #333;
+            border-radius: 16px;
+            background: #f5f5f5 !important;
+            cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            color: #333 !important;
+        }
+
+        .drop-label:hover {
+            background: #e8e8e8 !important;
+            border-color: #2196f3;
+        }
+
+        .instructions {
+            max-width: 700px;
+            padding: 20px;
+            background: #e3f2fd !important;
+            border-radius: 8px;
+            margin: 10px;
+            font-size: 14px !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976d2 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .file-input {
+            display: none;
+        }
+    </style>
+    <script src="viewer.js"></script>
+</head>
+
+<body>
+</body>
+
 </html>
