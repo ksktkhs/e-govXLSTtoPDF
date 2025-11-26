@@ -599,7 +599,34 @@ const renderPreview = (uniqueKey, pairData) => {
             printBtn.innerText = "PDFとして保存";
             printBtn.onclick = () => window.print();
 
-            leftSection.append(countLabel, printBtn);
+            // 倍率調整コントロール
+            const zoomControl = document.createElement("div");
+            zoomControl.setAttribute("class", "zoom-control");
+
+            const zoomLabel = document.createElement("label");
+            zoomLabel.innerText = "表示倍率:";
+
+            const zoomSlider = document.createElement("input");
+            zoomSlider.setAttribute("type", "range");
+            zoomSlider.setAttribute("class", "zoom-slider");
+            zoomSlider.setAttribute("min", "30");
+            zoomSlider.setAttribute("max", "150");
+            zoomSlider.setAttribute("value", "100");
+            zoomSlider.setAttribute("step", "5");
+
+            const zoomValue = document.createElement("span");
+            zoomValue.setAttribute("class", "zoom-value");
+            zoomValue.innerText = "100%";
+
+            zoomSlider.oninput = (e) => {
+                const zoomPercent = e.target.value;
+                zoomValue.innerText = `${zoomPercent}%`;
+                container.style.transform = `scale(${zoomPercent / 100})`;
+            };
+
+            zoomControl.append(zoomLabel, zoomSlider, zoomValue);
+
+            leftSection.append(countLabel, printBtn, zoomControl);
             header.append(leftSection);
 
             const infoSection = document.createElement("div");
