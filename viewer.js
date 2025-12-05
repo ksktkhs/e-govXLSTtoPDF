@@ -1,6 +1,3 @@
-// グローバル倍率設定（ファイル切り替え時も維持）デフォルト90%
-let globalZoom = 90; // v1.1
-
 const decompressZip = async (arrayBuffer) => {
     async function decompressData(compressedData) {
         const reader = new Blob([compressedData])
@@ -162,12 +159,26 @@ const applyTextFormatting = (contents) => {
         pre.textContent = newText;
     });
 
+    // Remove equality class to prevent flexbox layout issues
+    const equalityElements = contents.querySelectorAll(".equality");
+    equalityElements.forEach(el => {
+        el.classList.remove("equality");
+    });
+
     const tables = contents.querySelectorAll("table");
     tables.forEach(table => {
         const cells = table.querySelectorAll('td, th');
         cells.forEach(cell => {
             const text = cell.textContent.trim();
-            if (text === '被保険者整理番号') {
+            if (text === '被保険者整理番号' || text === '変更内容') {
+                // Remove conflicting flex styles if they exist inline
+                if (cell.style.display === 'flex') {
+                    cell.style.display = '';
+                }
+                if (cell.style.justifyContent) {
+                    cell.style.justifyContent = '';
+                }
+                
                 cell.style.textAlign = 'center';
             }
         });
@@ -188,52 +199,6 @@ const addFilesToStorage = async (files) => {
             const parts = file.webkitRelativePath.split('/');
             return parts.length > 1 ? parts[0] : null;
         }
-        return null;
-    };
-
-    // XMLファイルの同じフォルダにあるXSLを自動検出する関数
-    const findMatchingXSL = (xmlFile, processedFilesList) => {
-        const xmlBasename = xmlFile.name.replace(/\.xml$/, '');
-        
-        // webkitRelativePath からフォルダパスを取得（最後の/より前）
-        let xmlFolder = '';
-        if (xmlFile.webkitRelativePath && xmlFile.webkitRelativePath.includes('/')) {
-            xmlFolder = xmlFile.webkitRelativePath.substring(0, xmlFile.webkitRelativePath.lastIndexOf('/'));
-        }
-        
-        const hasFolder = xmlFolder !== '';
-        console.log(`XSL自動検出開始: ${xmlFile.name}, basename: ${xmlBasename}, フォルダ: "${xmlFolder}" (${hasFolder ? 'フォルダ選択' : 'ファイル選択/ドロップ'})`);
-        
-        for (const item of processedFilesList) {
-            const file = item.file;
-            if (!file.name.endsWith('.xsl')) continue;
-            
-            const xslBasename = file.name.replace(/\.xsl$/, '');
-            let xslFolder = '';
-            if (file.webkitRelativePath && file.webkitRelativePath.includes('/')) {
-                xslFolder = file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/'));
-            }
-            
-            console.log(`  チェック中: ${file.name}, basename: ${xslBasename}, フォルダ: "${xslFolder}"`);
-            
-            // basename が一致するかチェック
-            if (xmlBasename !== xslBasename) {
-                continue;
-            }
-            
-            // フォルダパスがある場合は、フォルダも一致する必要がある
-            // フォルダパスがない場合（ファイル選択/ドロップ）は、basenameだけで判定
-            if (hasFolder) {
-                if (xmlFolder === xslFolder) {
-                    console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name} (同じフォルダ)`);
-                    return file;
-                }
-            } else {
-                console.log(`  ✅ マッチ！ ${xmlFile.name} -> ${file.name} (basename一致)`);
-                return file;
-            }
-        }
-        console.log(`  ❌ マッチするXSLが見つかりませんでした`);
         return null;
     };
 
@@ -295,22 +260,7 @@ const addFilesToStorage = async (files) => {
 
     for (const { file: xmlFile, sourceIndex, sourceType, sourceName, folderName } of xmlFiles) {
         const basename = xmlFile.name.replace(/\.xml$/, '');
-        let xslData = xslCache.get(basename);
-
-        // XSL が見つからない場合、同じフォルダ内を自動検索
-        if (!xslData) {
-            const matchingXSL = findMatchingXSL(xmlFile, processedFiles);
-            if (matchingXSL) {
-                const xslText = await matchingXSL.text();
-                const xslParser = new DOMParser();
-                const xslDoc = xslParser.parseFromString(xslText, 'application/xml');
-                const titleElement = xslDoc.querySelector('title');
-                const title = titleElement ? titleElement.textContent.trim() : '';
-                xslData = { file: matchingXSL, title: title };
-                xslCache.set(basename, xslData);
-                console.log(`自動検出: ${xmlFile.name} に対応する ${matchingXSL.name} を発見`);
-            }
-        }
+        const xslData = xslCache.get(basename);
 
         const text = await xmlFile.text();
         const parser = new DOMParser();
@@ -648,18 +598,44 @@ const renderPreview = (uniqueKey, pairData) => {
             const isLandscape = pairData.basename.startsWith('2');
             container.setAttribute("class", isLandscape ? "container landscape" : "container");
 
-            // 公文書のcontentsのみを追加
-            container.appendChild(contents);
-            
-            // グローバル倍率設定を適用
-            container.style.transform = `scale(${globalZoom / 100})`;
-            
-            // transformによるレイアウトの崩れを防ぐためのラッパー
-            const wrapper = document.createElement("div");
-            wrapper.style.cssText = `display: inline-block; width: 100%;`;
-            wrapper.appendChild(container);
-            
-            rightPanel.append(wrapper);
+            const header = document.createElement("div");
+            header.setAttribute("class", "page-header");
+
+            const leftSection = document.createElement("div");
+            leftSection.setAttribute("class", "header-left");
+
+            const countLabel = document.createElement("span");
+            countLabel.style.cssText = "font-size: 14px; color: #666;";
+            countLabel.innerText = `${currentIndex + 1} / ${allKeys.length}`;
+
+            const printBtn = document.createElement("button");
+            printBtn.setAttribute("class", "print-btn");
+            printBtn.innerText = "PDFとして保存";
+            printBtn.onclick = () => window.print();
+
+            leftSection.append(countLabel, printBtn);
+            header.append(leftSection);
+
+            const infoSection = document.createElement("div");
+            infoSection.setAttribute("class", "info-section");
+            infoSection.style.cssText = "padding: 12px 16px; background: #f9f9f9; border-bottom: 1px solid #ddd;";
+
+            if (pairData.title) {
+                const titleDiv = document.createElement("div");
+                titleDiv.style.cssText = "font-size: 18px; font-weight: bold; color: #333; margin-bottom: 6px;";
+                titleDiv.innerText = pairData.title;
+                infoSection.appendChild(titleDiv);
+            }
+
+            if (pairData.jigyoushoName) {
+                const companyDiv = document.createElement("div");
+                companyDiv.style.cssText = "font-size: 16px; color: #555;";
+                companyDiv.innerText = pairData.jigyoushoName;
+                infoSection.appendChild(companyDiv);
+            }
+
+            container.append(header, infoSection, contents);
+            rightPanel.append(container);
         });
     });
 };
@@ -687,46 +663,62 @@ const renderUI = () => {
     const dropZone = document.createElement("div");
     dropZone.setAttribute("class", "drop-zone");
 
-    // ヘッダーセクション
-    const header = document.createElement("div");
-    header.setAttribute("class", "drop-zone-header");
-
     const title = document.createElement("h1");
     title.setAttribute("class", "drop-zone-title");
-    title.innerText = "電子公文書XML Viewer";
-    header.appendChild(title);
+    title.innerText = "電子公文書 PDF変換システム";
+    dropZone.appendChild(title);
 
     const subtitle = document.createElement("p");
     subtitle.setAttribute("class", "drop-zone-subtitle");
-    subtitle.innerText = "XML/XSLファイルをブラウザでPDFに変換";
-    header.appendChild(subtitle);
-
-    dropZone.appendChild(header);
-
-    // メインコンテンツ
-    const content = document.createElement("div");
-    content.setAttribute("class", "drop-zone-content");
+    subtitle.innerText = "XML/XSLファイルをアップロードしてPDFに変換";
+    dropZone.appendChild(subtitle);
 
     const fileLabel = document.createElement("label");
     fileLabel.setAttribute("class", "drop-label");
-    fileLabel.innerHTML = "ファイル・フォルダ・ZIPをドロップ<br><small style='font-size: 14px; opacity: 0.8; font-weight: 400;'>またはクリックしてファイル選択</small>";
+    fileLabel.innerText = "ファイル・フォルダ・ZIPをドラッグアンドドロップで追加";
+    fileLabel.style.cssText = "display: inline-block; margin: 5px;";
 
-    // ファイル選択用input（クリック時用、ZIP等の複数ファイル選択）
     const fileInput = document.createElement("input");
     fileInput.setAttribute("type", "file");
-    fileInput.setAttribute("id", "file-input-files");
     fileInput.setAttribute("class", "file-input");
     fileInput.setAttribute("multiple", "true");
-    fileInput.setAttribute("accept", ".xml,.xsl,.zip");
+    fileInput.setAttribute("webkitdirectory", "");
+    fileInput.setAttribute("directory", "");
     fileInput.onchange = (e) => {
         addFilesToStorage(Array.from(e.target.files));
         e.target.value = '';
     };
 
     fileLabel.appendChild(fileInput);
-    content.appendChild(fileLabel);
 
-    dropZone.appendChild(content);
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = "display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;";
+    buttonContainer.appendChild(fileLabel);
+
+    if (completePairs.length > 0) {
+        const clearBtnTop = document.createElement("button");
+        clearBtnTop.setAttribute("class", "drop-label");
+        clearBtnTop.style.cssText = "background: #f44336; color: white; border: none; display: inline-block; margin: 5px;";
+        clearBtnTop.innerText = "クリア";
+        clearBtnTop.onclick = () => {
+            if (confirm('すべてのファイルをクリアしますか？\n（アップロードしたファイルがすべて削除されます）')) {
+                fileStorage.clear();
+                xslCache.clear();
+                xmlPool.clear();
+                processedFileKeys.clear();
+                renderUI();
+            }
+        };
+        clearBtnTop.onmouseover = () => {
+            clearBtnTop.style.background = "#d32f2f";
+        };
+        clearBtnTop.onmouseout = () => {
+            clearBtnTop.style.background = "#f44336";
+        };
+        buttonContainer.appendChild(clearBtnTop);
+    }
+
+    dropZone.appendChild(buttonContainer);
 
     if (completePairs.length > 0) {
         const splitView = document.createElement("div");
@@ -738,22 +730,12 @@ const renderUI = () => {
         const leftHeader = document.createElement("div");
         leftHeader.setAttribute("class", "left-panel-header");
 
-        // 1段目：ファイル一覧(x件)
         const headerTop = document.createElement("div");
-        headerTop.style.cssText = "margin-bottom: 6px;";
+        headerTop.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;";
 
         const headerTitle = document.createElement("h3");
         headerTitle.style.cssText = "margin: 0; color: #333;";
         headerTitle.innerText = `ファイル一覧 (${completePairs.length}件)`;
-
-        headerTop.appendChild(headerTitle);
-
-        // 2段目：トップに戻る 追加 全削除 と PDFとして保存（右端）
-        const headerButtons = document.createElement("div");
-        headerButtons.style.cssText = "display: flex; gap: 4px; justify-content: space-between; align-items: center;";
-
-        const leftButtons = document.createElement("div");
-        leftButtons.style.cssText = "display: flex; gap: 4px;";
 
         const backBtn = document.createElement("button");
         backBtn.setAttribute("class", "home-btn");
@@ -767,11 +749,16 @@ const renderUI = () => {
             renderUI();
         };
 
+        headerTop.append(headerTitle, backBtn);
+
+        const headerButtons = document.createElement("div");
+        headerButtons.style.cssText = "display: flex; gap: 4px;";
+
         const addFileBtn = document.createElement("button");
         addFileBtn.setAttribute("class", "home-btn");
         addFileBtn.style.cssText = "padding: 4px 8px; font-size: 11px;";
         addFileBtn.innerText = "追加";
-        addFileBtn.onclick = () => document.getElementById('file-input-files').click();
+        addFileBtn.onclick = () => fileInput.click();
 
         const clearBtn = document.createElement("button");
         clearBtn.setAttribute("class", "home-btn");
@@ -789,76 +776,8 @@ const renderUI = () => {
         clearBtn.onmouseover = () => { clearBtn.style.background = "#d32f2f"; };
         clearBtn.onmouseout = () => { clearBtn.style.background = "#f44336"; };
 
-        leftButtons.append(backBtn, addFileBtn, clearBtn);
-
-        const printBtn = document.createElement("button");
-        printBtn.setAttribute("class", "home-btn");
-        printBtn.style.cssText = "background: #4caf50; padding: 4px 12px; font-size: 11px;";
-        printBtn.innerText = "PDFとして保存";
-        printBtn.onclick = () => window.print();
-        printBtn.onmouseover = () => { printBtn.style.background = "#45a049"; };
-        printBtn.onmouseout = () => { printBtn.style.background = "#4caf50"; };
-
-        headerButtons.append(leftButtons, printBtn);
-        
-        // 倍率調整コントロール
-        const zoomRow = document.createElement("div");
-        zoomRow.style.cssText = "display: flex; gap: 4px; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;";
-        
-        const zoomControl = document.createElement("div");
-        zoomControl.setAttribute("class", "zoom-control");
-        zoomControl.style.cssText = "display: flex; align-items: center; gap: 4px; padding: 3px 6px; background: #fafafa; border-radius: 3px; border: 1px solid #ddd; flex: 1;";
-
-        const zoomLabel = document.createElement("label");
-        zoomLabel.style.cssText = "font-size: 10px !important; color: #555 !important; margin: 0; white-space: nowrap;";
-        zoomLabel.innerText = "ビューワー表示倍率:";
-
-        const zoomOutBtn = document.createElement("button");
-        zoomOutBtn.setAttribute("class", "zoom-btn");
-        zoomOutBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
-        zoomOutBtn.innerText = "−";
-        zoomOutBtn.onclick = () => {
-            if (globalZoom > 30) {
-                globalZoom -= 10;
-                zoomValue.innerText = `${globalZoom}%`;
-                const allContainers = document.querySelectorAll('.right-panel .container');
-                allContainers.forEach(c => c.style.transform = `scale(${globalZoom / 100})`);
-            }
-        };
-
-        const zoomValue = document.createElement("span");
-        zoomValue.setAttribute("class", "zoom-value");
-        zoomValue.style.cssText = "font-size: 11px !important; color: #333 !important; min-width: 35px; text-align: center; font-weight: 600;";
-        zoomValue.innerText = `${globalZoom}%`;
-
-        const zoomInBtn = document.createElement("button");
-        zoomInBtn.setAttribute("class", "zoom-btn");
-        zoomInBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
-        zoomInBtn.innerText = "＋";
-        zoomInBtn.onclick = () => {
-            if (globalZoom < 150) {
-                globalZoom += 10;
-                zoomValue.innerText = `${globalZoom}%`;
-                const allContainers = document.querySelectorAll('.right-panel .container');
-                allContainers.forEach(c => c.style.transform = `scale(${globalZoom / 100})`);
-            }
-        };
-
-        const zoomResetBtn = document.createElement("button");
-        zoomResetBtn.setAttribute("class", "zoom-btn");
-        zoomResetBtn.style.cssText = "padding: 2px 8px; font-size: 11px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;";
-        zoomResetBtn.innerText = "100%";
-        zoomResetBtn.onclick = () => {
-            globalZoom = 100;
-            zoomValue.innerText = "100%";
-            const allContainers = document.querySelectorAll('.right-panel .container');
-            allContainers.forEach(c => c.style.transform = "scale(1)");
-        };
-
-        zoomControl.append(zoomLabel, zoomOutBtn, zoomValue, zoomInBtn, zoomResetBtn);
-        zoomRow.appendChild(zoomControl);
-        
-        leftHeader.append(headerTop, headerButtons, zoomRow);
+        headerButtons.append(addFileBtn, clearBtn);
+        leftHeader.append(headerTop, headerButtons);
 
         const leftContent = document.createElement("div");
         leftContent.setAttribute("class", "left-panel-content");
@@ -866,7 +785,7 @@ const renderUI = () => {
         const dropArea = document.createElement("div");
         dropArea.setAttribute("class", "drop-area-compact");
         dropArea.innerHTML = "ファイル・フォルダ・zipファイル<br><small style='color: #999; font-size: 10px;'>をドラッグ&ドロップしてください</small>";
-        dropArea.onclick = () => document.getElementById('file-input-files').click();
+        dropArea.onclick = () => fileInput.click();
 
         dropArea.ondragover = (e) => {
             e.preventDefault();
@@ -1066,14 +985,6 @@ const renderUI = () => {
 
     dropZone.appendChild(instructions);
     body.appendChild(dropZone);
-
-    // フッター（トップページのみ表示）
-    if (completePairs.length === 0) {
-        const footer = document.createElement("div");
-        footer.setAttribute("class", "footer");
-        footer.innerText = "© 2024 Keisuke Takahashi. All rights reserved.";
-        body.appendChild(footer);
-    }
 };
 
 window.onload = () => {
